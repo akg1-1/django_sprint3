@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if post %}Редактировать публикацию{% else %}Новая публикация{% endif %}
+{% endblock %}
+{% block content %}
+  <h1>{% if post %}Редактировать публикацию{% else %}Новая публикация{% endif %}</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">
+      {% if post %}Сохранить{% else %}Опубликовать{% endif %}
+    </button>
+  </form>
+{% endblock %}

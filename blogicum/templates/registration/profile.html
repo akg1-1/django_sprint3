@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.username }}{% endblock %}
+{% block content %}
+  <h1>{{ profile.username }}</h1>
+  <p>Имя: {{ profile.first_name }} {{ profile.last_name }}</p>
+  <p>Email: {{ profile.email }}</p>
+  {% if user == profile %}
+    <a href="{% url "blog:profile_edit" profile.username %}" class="btn btn-primary mb-3">Редактировать профиль</a>
+    <a href="{% url "password_change" %}" class="btn btn-secondary mb-3">Изменить пароль</a>
+  {% endif %}
+  <h2>Публикации</h2>
+  {% for post in page_obj %}
+    <article class="mb-5">
+      {% include "includes/post_card.html" %}
+    </article>
+  {% endfor %}
+  {% if page_obj.has_other_pages %}
+    {% include "includes/paginator.html" %}
+  {% endif %}
+{% endblock %}

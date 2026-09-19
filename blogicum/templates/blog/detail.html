@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}
+  {{ post.title }} | {% if post.location %}{{ post.location.name }} |{% endif %} {{ post.pub_date|date:"d E Y" }}
+{% endblock %}
+{% block content %}
+  <article>
+    {% if post.image %}
+      <img src="{{ post.image.url }}" class="img-fluid mb-3" alt="{{ post.title }}">
+    {% endif %}
+    <p>{{ post.pub_date|date:"d E Y" }} |
+      {% if post.location %}{{ post.location.name }}{% else %}Планета Земля{% endif %}<br>
+      <small>От автора @{{ post.author.username }} в категории {% include "includes/category_link.html" %}</small>
+    </p>
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.text|linebreaksbr }}</p>
+    {% if user == post.author %}
+      <a href="{% url "blog:post_edit" post.id %}" class="btn btn-primary">Редактировать</a>
+      <a href="{% url "blog:post_delete" post.id %}" class="btn btn-danger">Удалить</a>
+    {% endif %}
+  </article>
+
+  {% if is_delete_confirm %}
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5>Подтвердите удаление</h5>
+        <p>Вы уверены, что хотите удалить публикацию «{{ post.title }}»?</p>
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Да, удалить</button>
+          <a href="{% url "blog:post_detail" post.id %}" class="btn btn-secondary">Отмена</a>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if is_edit_comment %}
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5>Редактировать комментарий</h5>
+        <form method="post" action="{% url "blog:edit_comment" post.id comment.id %}">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+      </div>
+    </div>
+  {% elif is_delete_comment_confirm %}
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5>Подтвердите удаление комментария</h5>
+        <p>{{ comment.text }}</p>
+        <form method="post" action="{% url "blog:delete_comment" post.id comment.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Да, удалить</button>
+          <a href="{% url "blog:post_detail" post.id %}" class="btn btn-secondary">Отмена</a>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    {% if user.is_authenticated %}
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5>Добавить комментарий</h5>
+          <form method="post" action="{% url "blog:add_comment" post.id %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Отправить</button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if comments %}
+      <div class="mt-4">
+        <h5>Комментарии ({{ comments|length }})</h5>
+        {% for comment in comments %}
+          <div class="card mb-2">
+            <div class="card-body">
+              <p class="card-text">{{ comment.text }}</p>
+              <small class="text-muted">
+                {{ comment.author.username }} | {{ comment.created_at|date:"d E Y H:i" }}
+                {% if user == comment.author %}
+                  | <a href="{% url "blog:edit_comment" post.id comment.id %}">Редактировать</a>
+                  | <a href="{% url "blog:delete_comment" post.id comment.id %}">Удалить</a>
+                {% endif %}
+              </small>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+{% endblock %}
